@@ -1,5 +1,6 @@
 package org.example.security;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -8,13 +9,21 @@ import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
+import org.springframework.security.core.userdetails.AuthenticationUserDetailsService;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationProvider;
+import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken;
+import org.springframework.security.web.session.DisableEncodeUrlFilter;
+
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity(debug = true)
 public class SecurityConfig {
 
+  @Value("#{${validReferers}}")
+  private List<String> validReferers;
 
   @Bean
   public AuthenticationProvider authenticationProvider() {
@@ -30,7 +39,7 @@ public class SecurityConfig {
 
 
   public CustomPreAuthFilter customPreAuthFilter( AuthenticationManager authenticationManager ) {
-    CustomPreAuthFilter customPreAuthFilter = new CustomPreAuthFilter();
+    CustomPreAuthFilter customPreAuthFilter = new CustomPreAuthFilter( validReferers );
     customPreAuthFilter.setAuthenticationManager( authenticationManager );
     customPreAuthFilter.setPrincipalRequestParam( "email" );
     customPreAuthFilter.setAuthenticationDetailsSource( new CustomPreAuthenticationDetailsSource() );
@@ -52,6 +61,8 @@ public class SecurityConfig {
             .authorizeHttpRequests( request ->
                     request.anyRequest().authenticated() )
             .addFilter( customPreAuthFilter( authenticationManager ) )
+            // permit being loaded into iframe
+            .headers( headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable) )
             .build();
 
   }

@@ -21,4 +21,5 @@ public class CustomPreAuthUserDetailsService implements AuthenticationUserDetail
   protected UserDetails buildUserDetails(PreAuthenticatedAuthenticationToken token, Collection<? extends GrantedAuthority> authorities) {
     return new CustomPreAuthUserDetails(token.getName(), authorities);
   }
+
 }
