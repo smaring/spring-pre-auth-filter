@@ -1,5 +1,6 @@
 package org.example.security;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -24,6 +25,9 @@ public class SecurityConfig {
 
   @Value("#{${validReferers}}")
   private List<String> validReferers;
+
+  @Autowired
+  private FilterChainExceptionHandler filterChainExceptionHandler;
 
   @Bean
   public AuthenticationProvider authenticationProvider() {
@@ -58,9 +62,12 @@ public class SecurityConfig {
             .httpBasic(AbstractHttpConfigurer::disable)
             .anonymous(AbstractHttpConfigurer::disable)
             .logout(AbstractHttpConfigurer::disable)
-            .authorizeHttpRequests( request ->
-                    request.anyRequest().authenticated() )
+            .authorizeHttpRequests( request -> request
+                    .requestMatchers("/error").permitAll()
+                    .anyRequest().authenticated()
+            )
             .addFilter( customPreAuthFilter( authenticationManager ) )
+            .addFilterBefore( filterChainExceptionHandler, CustomPreAuthFilter.class)
             // permit being loaded into iframe
             .headers( headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable) )
             .build();
