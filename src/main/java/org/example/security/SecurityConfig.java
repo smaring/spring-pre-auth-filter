@@ -11,11 +11,8 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
-import org.springframework.security.core.userdetails.AuthenticationUserDetailsService;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationProvider;
-import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken;
-import org.springframework.security.web.session.DisableEncodeUrlFilter;
 
 import java.util.List;
 
@@ -27,7 +24,7 @@ public class SecurityConfig {
   private List<String> validReferers;
 
   @Autowired
-  private FilterChainExceptionHandler filterChainExceptionHandler;
+  private FilterChainExceptionHandlingFilter filterChainExceptionHandler;
 
   @Bean
   public AuthenticationProvider authenticationProvider() {
@@ -63,7 +60,6 @@ public class SecurityConfig {
             .anonymous(AbstractHttpConfigurer::disable)
             .logout(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests( request -> request
-                    .requestMatchers("/error").permitAll()
                     .anyRequest().authenticated()
             )
             .addFilter( customPreAuthFilter( authenticationManager ) )

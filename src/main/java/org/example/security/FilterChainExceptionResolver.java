@@ -3,6 +3,8 @@ package org.example.security;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.ModelAndView;
@@ -16,6 +18,7 @@ public class FilterChainExceptionResolver implements HandlerExceptionResolver {
     log.info( "handling exception from filter chain" );
     ModelAndView modelAndView = new ModelAndView();
     modelAndView.setViewName("error");
+    //modelAndView.setStatus(HttpStatus.FORBIDDEN);
     modelAndView.addObject( "message", ex.getLocalizedMessage() );
     return modelAndView;
   }
